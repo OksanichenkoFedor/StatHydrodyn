@@ -6,10 +6,10 @@ from circle_funcs import generate_circle
 from eclipse_funcs import generate_eclipse
 from rectangle_funcs import generate_rectangle
 from backend import contur_ordering
-from custom_contur_funcs import generate_is_in_array
+from custom_contur_funcs import generate_is_in_array, generate_unordered_contur_array
 from counting import count
 
-class Circle_panel(tk.Frame):
+class CirclePanel(tk.Frame):
     def __init__(self, master):
         self.master = master
         super().__init__(master)
@@ -51,7 +51,7 @@ class Circle_panel(tk.Frame):
 
 
 
-class Eclipse_panel(tk.Frame):
+class EclipsePanel(tk.Frame):
     def __init__(self, master):
         self.master = master
         super().__init__(master)
@@ -159,7 +159,7 @@ class Eclipse_panel(tk.Frame):
             colr.configure(fg="red")
 
 
-class Rectangle_panel(tk.Frame):
+class RectanglePanel(tk.Frame):
     def __init__(self, master):
         self.master = master
         super().__init__(master)
@@ -265,3 +265,64 @@ class Rectangle_panel(tk.Frame):
         else:
             status.set("Enter the number")
             colr.configure(fg="red")
+
+
+
+class CustomPanel(tk.Frame):
+    def __init__(self, master):
+
+
+        self.progress_var = tk.IntVar()
+        self.progress_txt = tk.StringVar()
+
+        self.master = master
+        super().__init__(master)
+
+
+
+        self.bdraw = tk.Button(self, text="Start drawing", width=14,
+                                 command=self.drawing_button_effect)
+        self.bdraw.grid(row=0, column=0, columnspan=2)
+        self.bcompile = tk.Button(self, text="Compile", state=tk.DISABLED, width=14,
+                                  command=self.compile)
+        self.bcompile.grid(row=1, column=0, columnspan=2)
+        self.progress_bar = Progressbar(self, orient="horizontal", maximum=10, mode="determinate",
+                                        var=self.progress_var)
+        self.progress_lbl = tk.Label(self, textvariable=self.progress_txt)
+        self.progress_txt.set("Delta: 0")
+        self.progress_bar.grid(row=2, column=0)
+        self.progress_lbl.grid(row=2, column=1)
+
+
+
+    def drawing_button_effect(self):
+        if config.is_collected_custom_contur:
+            config.is_collected_custom_contur = False
+            config.curr_drawing = "empty plot"
+            self.master.master.plotF.replot()
+            self.bdraw.config(text="Start drawing")
+            self.bcompile.config(state=tk.DISABLED)
+        else:
+            config.is_collected_custom_contur = True
+            config.curr_drawing = "drawing"
+            self.master.master.plotF.replot()
+            self.bdraw.config(text="Reset")
+            self.bcompile.config(state=tk.DISABLED)
+
+    def compile(self):
+        config.curr_drawing = "contur"
+        self.master.master.plotF.replot()
+        count(self.progress_bar, self.progress_txt, self.progress_var)
+        config.curr_drawing = "3d"
+        self.master.master.plotF.replot()
+        self.bcompile.config(state=tk.DISABLED)
+
+
+    def custom_contur(self):
+        contur_ordering()
+        generate_unordered_contur_array()
+        contur_ordering()
+        generate_is_in_array()
+        config.curr_drawing = "contur"
+        self.master.master.plotF.replot()
+        self.bcompile.config(state=tk.NORMAL)

@@ -2,6 +2,7 @@ import matplotlib.path as mplPath
 import config
 import numpy as np
 from numba import njit
+from tqdm.autonotebook import tqdm
 
 
 def generate_is_in_array():
@@ -28,6 +29,90 @@ def generate_is_in_array():
                 else:
                     arr[i, j] = 0
     config.curr_custom_is_in = arr.astype(np.int64)
+
+
+def generate_unordered_contur_array():
+    new_contur = [[], []]
+
+    points = []
+    for i in range(len(config.curr_contur[0])):
+        points.append([config.curr_contur[0][i], config.curr_contur[1][i]])
+    for i in range(len(points)-1):
+        x1,y1 = points[i]
+        x2,y2 = points[i+1]
+        newX, newY = make_segment(x1, y1, x2, y2)
+        new_contur[0] = new_contur[0] + newX
+        new_contur[1] = new_contur[1] + newY
+    x1, y1 = points[-1]
+    x2, y2 = points[0]
+    newX, newY = make_segment(x1, y1, x2, y2)
+    new_contur[0] = new_contur[0] + newX[:-1]
+    new_contur[1] = new_contur[1] + newY[:-1]
+
+    config.curr_contur = np.array(new_contur)
+
+
+@njit()
+def is_cell_in_line(x1, y1, x2, y2, x3, y3):
+    a00 = is_point_in_line(x1, y1, x2, y2, x3 + 0, y3 + 0)
+    a10 = is_point_in_line(x1, y1, x2, y2, x3 + 1, y3 + 0)
+    a01 = is_point_in_line(x1, y1, x2, y2, x3 + 0, y3 + 1)
+    a11 = is_point_in_line(x1, y1, x2, y2, x3 + 1, y3 + 1)
+    if ((a00 + a10 + a01 + a11) + 4) % 8 != 0:
+        return True
+    return False
+
+
+@njit()
+def is_point_in_line(x1, y1, x2, y2, x3, y3):
+    d = (x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)
+    if d > 0:
+        return 1
+    if d < 0:
+        return -1
+    return 0
+
+
+def make_segment(x1, y1, x2, y2):
+    curr_arr_x = [x1]
+    curr_arr_y = [y1]
+    curr_x = x1
+    curr_y = y1
+    x_vec = 1
+    if x1 > x2:
+        x_vec = -1
+    y_vec = 1
+    if y1 > y2:
+        y_vec = -1
+    reached_x = False
+    if x1==x2:
+        reached_x = True
+    reached_y = False
+    if y1==y2:
+        reached_y= True
+    while not (reached_x and reached_y):
+        if not reached_x:
+            if is_cell_in_line(x1, y1, x2, y2, curr_x+x_vec, curr_y):
+                curr_arr_x.append(curr_x+x_vec)
+                curr_arr_y.append(curr_y)
+                if curr_x+x_vec==x2:
+                    reached_x = True
+                curr_x = curr_x + x_vec
+            else:
+                curr_arr_x.append(curr_x)
+                curr_arr_y.append(curr_y + y_vec)
+                if curr_y+y_vec==y2:
+                    reached_y = True
+                curr_y = curr_y + y_vec
+        else:
+            curr_arr_x.append(curr_x)
+            curr_arr_y.append(curr_y + y_vec)
+            if curr_y + y_vec == y2:
+                reached_y = True
+            curr_y = curr_y + y_vec
+    return (curr_arr_x, curr_arr_y)
+
+
 
 
 @njit()

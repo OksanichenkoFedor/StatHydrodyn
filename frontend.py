@@ -2,11 +2,9 @@ from tkinter import Tk, W, E, BOTH, ttk, messagebox
 import tkinter as tk
 from tkinter.ttk import Frame, Button, Entry, Style, Label, Radiobutton
 
-
 import plot, backend, circle_funcs, counting, eclipse_funcs
 import custom_contur_funcs
-from additional_panels import Circle_panel, Eclipse_panel, Rectangle_panel
-
+from additional_panels import CirclePanel, EclipsePanel, RectanglePanel, CustomPanel
 
 import config
 
@@ -19,7 +17,7 @@ class PE2_Frame(Frame):
 
     def initUI(self):
         self.master.title("Нелинейные колебания")
-        #Style().configure("TFrame", background="#333")
+        # Style().configure("TFrame", background="#333")
         self.pack(fill=BOTH, expand=True)
 
         Style().configure("TButton", padding=(0, 5, 0, 5), font='serif 10')
@@ -28,21 +26,21 @@ class PE2_Frame(Frame):
         self.rowconfigure(4, pad=5)
 
         self.plotF = plot.PlotFrame(self)
-        #self.bA = blockA(self)
-        #self.bB = blockB(self)
-        #self.bC = blockC(self)
-        #self.bD = blockD(self)
+        # self.bA = blockA(self)
+        # self.bB = blockB(self)
+        # self.bC = blockC(self)
+        # self.bD = blockD(self)
         self.common = common_frame(self)
 
         self.plotF.grid(row=0, column=0, rowspan=4)
         self.common.grid(row=0, column=1, columnspan=2)
-        #self.bA.grid(row=1, column=1)
-        #self.bB.grid(row=1, column=2)
-        #self.bC.grid(row=2, column=1)
-        #self.bD.grid(row=2, column=2)
-        #self.bE.grid(row=3, column=1)
+        # self.bA.grid(row=1, column=1)
+        # self.bB.grid(row=1, column=2)
+        # self.bC.grid(row=2, column=1)
+        # self.bD.grid(row=2, column=2)
+        # self.bE.grid(row=3, column=1)
 
-        #self.pack()
+        # self.pack()
 
 
 class common_frame(Frame):
@@ -58,7 +56,6 @@ class common_frame(Frame):
         self.pe_status_text = tk.StringVar()
 
         self.draw_row = 8
-
 
         self.columnconfigure(3, pad=3)
         self.rowconfigure(4, pad=3)
@@ -77,7 +74,8 @@ class common_frame(Frame):
         self.nc_status_text.set("Correct value")
         self.nc_status_lbl.grid(row=3, column=0, columnspan=2)
         self.n_cells.trace("w", lambda name, index, mode, status=self.nc_status_text, colr=self.nc_status_lbl,
-                                       value=self.n_cells: self.n_cells_callback(name, index, mode, status, colr, value))
+                                       value=self.n_cells: self.n_cells_callback(name, index, mode, status, colr,
+                                                                                 value))
 
         self.pe_lbl = tk.Label(self, text="Possible error (log10):")
         self.pe_lbl.grid(row=4, column=0)
@@ -88,49 +86,51 @@ class common_frame(Frame):
         self.pe_status_text.set("Correct value")
         self.pe_status_lbl.grid(row=5, column=0, columnspan=2)
         self.poss_err.trace("w", lambda name, index, mode, status=self.pe_status_text, colr=self.pe_status_lbl,
-                                       value=self.poss_err: self.poss_err_callback(name, index, mode, status, colr,
-                                                                                 value))
+                                        value=self.poss_err: self.poss_err_callback(name, index, mode, status, colr,
+                                                                                    value))
 
         self.curr_counting = tk.StringVar()
 
-
         self.rb_circle = Radiobutton(self, text="Circle",
-                          variable=self.curr_counting, value="circle")
+                                     variable=self.curr_counting, value="circle")
         self.rb_eclipse = Radiobutton(self, text="Eclipse",
-                            variable=self.curr_counting, value="eclipse")
+                                      variable=self.curr_counting, value="eclipse")
         self.rb_rectangle = Radiobutton(self, text="Rectangle",
-                           variable=self.curr_counting, value="rectangle")
+                                        variable=self.curr_counting, value="rectangle")
         self.rb_custom = Radiobutton(self, text="Custom contur",
-                             variable=self.curr_counting, value="custom")
+                                     variable=self.curr_counting, value="custom")
 
         self.curr_counting.set("circle")
         self.rb_circle.grid(row=6, column=0)
         self.rb_eclipse.grid(row=6, column=1)
         self.rb_rectangle.grid(row=7, column=0)
         self.rb_custom.grid(row=7, column=1)
-        self.curr_counting.trace("w", lambda name, index, mode, status=self.curr_counting,: self.curr_counting_callback(name, index, mode, status))
+        self.curr_counting.trace("w",
+                                 lambda name, index, mode, status=self.curr_counting,: self.curr_counting_callback(name,
+                                                                                                                   index,
+                                                                                                                   mode,
+                                                                                                                   status))
 
-        self.circle_panel = Circle_panel(self)
+        self.circle_panel = CirclePanel(self)
         self.circle_panel.grid(row=self.draw_row, column=0, columnspan=2)
 
-        self.eclipse_panel = Eclipse_panel(self)
+        self.eclipse_panel = EclipsePanel(self)
         self.eclipse_panel.grid(row=self.draw_row, column=0, columnspan=2)
 
-        self.rectangle_panel = Rectangle_panel(self)
+        self.rectangle_panel = RectanglePanel(self)
         self.rectangle_panel.grid(row=self.draw_row, column=0, columnspan=2)
 
-        #self.bcircle = tk.Button(self, text="Circle", width=14,
+        self.custom_panel = CustomPanel(self)
+        self.custom_panel.grid(row=self.draw_row, column=0, columnspan=2)
+
+        # self.bcircle = tk.Button(self, text="Circle", width=14,
         #                       command=self.circle)
-        #self.bcircle.grid(row=7, column=0, columnspan=4)
+        # self.bcircle.grid(row=7, column=0, columnspan=4)
 
-        #self.bcompile = tk.Button(self, text="Compile", state=tk.DISABLED, width=14,
+        # self.bcompile = tk.Button(self, text="Compile", state=tk.DISABLED, width=14,
         #                         command=self.compile)
-        #self.bcompile.grid(row=6, column=0, columnspan=4)
+        # self.bcompile.grid(row=6, column=0, columnspan=4)
         self.forget_not_drawing()
-
-
-
-
 
     def n_cells_callback(self, name, index, mode, status, colr, value):
         good_value = False
@@ -140,7 +140,7 @@ class common_frame(Frame):
         except:
             pass
         if good_value:
-            if n_cells>0:
+            if n_cells > 0:
                 config.N = n_cells
                 status.set("Correct value")
                 colr.configure(fg="green")
@@ -150,8 +150,6 @@ class common_frame(Frame):
         else:
             status.set("Put positive integer value")
             colr.configure(fg="red")
-
-
 
     def poss_err_callback(self, name, index, mode, status, colr, value):
         good_value = False
@@ -169,23 +167,35 @@ class common_frame(Frame):
             colr.configure(fg="red")
 
     def forget_not_drawing(self):
-        print(config.curr_counting)
-        if config.curr_counting=="circle":
-            self.circle_panel = Circle_panel(self)
+        if config.curr_counting == "circle":
+            self.circle_panel = CirclePanel(self)
             self.circle_panel.grid(row=self.draw_row, column=0, columnspan=2)
             self.eclipse_panel.grid_forget()
             self.rectangle_panel.grid_forget()
-        elif config.curr_counting=="eclipse":
-            self.eclipse_panel = Eclipse_panel(self)
+            self.custom_panel.grid_forget()
+        elif config.curr_counting == "eclipse":
+            self.eclipse_panel = EclipsePanel(self)
             self.eclipse_panel.grid(row=self.draw_row, column=0, columnspan=2)
             self.circle_panel.grid_forget()
             self.rectangle_panel.grid_forget()
-        elif config.curr_counting=="rectangle":
-            self.rectangle_panel = Rectangle_panel(self)
+            self.custom_panel.grid_forget()
+        elif config.curr_counting == "rectangle":
+            self.rectangle_panel = RectanglePanel(self)
             self.rectangle_panel.grid(row=self.draw_row, column=0, columnspan=2)
             self.circle_panel.grid_forget()
             self.eclipse_panel.grid_forget()
+            self.custom_panel.grid_forget()
+        elif config.curr_counting == "custom":
+            self.circle_panel.grid_forget()
+            self.custom_panel = CustomPanel(self)
+            self.custom_panel.grid(row=self.draw_row, column=0, columnspan=2)
+            self.circle_panel.grid_forget()
+            self.eclipse_panel.grid_forget()
+            self.rectangle_panel.grid_forget()
 
     def curr_counting_callback(self, name, index, mode, status):
+        config.curr_contur = None
+        config.curr_drawing = "empty"
+        self.master.plotF.replot()
         config.curr_counting = status.get()
         self.forget_not_drawing()

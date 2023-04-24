@@ -5,7 +5,6 @@ import numpy as np
 def contur_ordering():
     X = config.curr_contur[0]
     Y = config.curr_contur[1]
-    print("len X:",len(X))
     way = []
     ib = 0
     a = 0
