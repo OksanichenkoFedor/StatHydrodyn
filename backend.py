@@ -2,17 +2,6 @@ import config
 from numba import njit
 import numpy as np
 
-
-
-
-
-
-
-
-
-
-
-
 def contur_ordering():
     X = config.curr_contur[0]
     Y = config.curr_contur[1]

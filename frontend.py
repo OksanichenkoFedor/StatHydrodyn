@@ -3,8 +3,9 @@ import tkinter as tk
 from tkinter.ttk import Frame, Button, Entry, Style, Label, Radiobutton
 
 
-import plot, backend, circle_funcs, counting
+import plot, backend, circle_funcs, counting, eclipse_funcs
 import custom_contur_funcs
+from additional_panels import Circle_panel, Eclipse_panel, Rectangle_panel
 
 
 import config
@@ -53,63 +54,138 @@ class common_frame(Frame):
     def initUI(self):
         self.n_cells = tk.StringVar()
         self.poss_err = tk.StringVar()
+        self.nc_status_text = tk.StringVar()
+        self.pe_status_text = tk.StringVar()
+
+        self.draw_row = 8
+
 
         self.columnconfigure(3, pad=3)
         self.rowconfigure(4, pad=3)
 
         # подписи
-        self.tot_lbl = Label(self, text="Общие параметры")
-        self.tot_lbl.grid(row=0, column=0, columnspan=4)
-        self.tot_lbl = Label(self, text="Параметры симуляции")
+
+        self.tot_lbl = Label(self, text="Parameters of the simulation")
         self.tot_lbl.grid(row=1, column=0, columnspan=2)
         # поля для параметров
-        self.dt_lbl = Label(self, text="Number of cells:")
-        self.dt_lbl.grid(row=2, column=0)
-        self.dt_ent = Entry(self, textvariable=self.n_cells)
+        self.nc_lbl = Label(self, text="Number of cells:")
+        self.nc_lbl.grid(row=2, column=0)
+        self.nc_ent = Entry(self, textvariable=self.n_cells)
         self.n_cells.set(config.N)
-        self.dt_ent.grid(row=2, column=1)
+        self.nc_ent.grid(row=2, column=1)
+        self.nc_status_lbl = tk.Label(self, textvariable=self.nc_status_text, fg="green")
+        self.nc_status_text.set("Correct value")
+        self.nc_status_lbl.grid(row=3, column=0, columnspan=2)
+        self.n_cells.trace("w", lambda name, index, mode, status=self.nc_status_text, colr=self.nc_status_lbl,
+                                       value=self.n_cells: self.n_cells_callback(name, index, mode, status, colr, value))
 
-        self.T_lbl = Label(self, text="Possible error (log10):")
-        self.T_lbl.grid(row=3, column=0)
-        self.T_ent = Entry(self, textvariable=self.poss_err)
+        self.pe_lbl = tk.Label(self, text="Possible error (log10):")
+        self.pe_lbl.grid(row=4, column=0)
+        self.pe_ent = tk.Entry(self, textvariable=self.poss_err)
         self.poss_err.set(config.poss_err)
-        self.T_ent.grid(row=3, column=1)
+        self.pe_ent.grid(row=4, column=1)
+        self.pe_status_lbl = tk.Label(self, textvariable=self.pe_status_text, fg="green")
+        self.pe_status_text.set("Correct value")
+        self.pe_status_lbl.grid(row=5, column=0, columnspan=2)
+        self.poss_err.trace("w", lambda name, index, mode, status=self.pe_status_text, colr=self.pe_status_lbl,
+                                       value=self.poss_err: self.poss_err_callback(name, index, mode, status, colr,
+                                                                                 value))
+
+        self.curr_counting = tk.StringVar()
 
 
-        self.bcircle = tk.Button(self, text="Circle", width=14,
-                               command=self.circle)
-        self.bcircle.grid(row=5, column=0, columnspan=2)
+        self.rb_circle = Radiobutton(self, text="Circle",
+                          variable=self.curr_counting, value="circle")
+        self.rb_eclipse = Radiobutton(self, text="Eclipse",
+                            variable=self.curr_counting, value="eclipse")
+        self.rb_rectangle = Radiobutton(self, text="Rectangle",
+                           variable=self.curr_counting, value="rectangle")
+        self.rb_custom = Radiobutton(self, text="Custom contur",
+                             variable=self.curr_counting, value="custom")
 
-        self.bcompile = tk.Button(self, text="Compile", state=tk.DISABLED, width=14,
-                                 command=self.compile)
-        self.bcompile.grid(row=5, column=2, columnspan=2)
+        self.curr_counting.set("circle")
+        self.rb_circle.grid(row=6, column=0)
+        self.rb_eclipse.grid(row=6, column=1)
+        self.rb_rectangle.grid(row=7, column=0)
+        self.rb_custom.grid(row=7, column=1)
+        self.curr_counting.trace("w", lambda name, index, mode, status=self.curr_counting,: self.curr_counting_callback(name, index, mode, status))
+
+        self.circle_panel = Circle_panel(self)
+        self.circle_panel.grid(row=self.draw_row, column=0, columnspan=2)
+
+        self.eclipse_panel = Eclipse_panel(self)
+        self.eclipse_panel.grid(row=self.draw_row, column=0, columnspan=2)
+
+        self.rectangle_panel = Rectangle_panel(self)
+        self.rectangle_panel.grid(row=self.draw_row, column=0, columnspan=2)
+
+        #self.bcircle = tk.Button(self, text="Circle", width=14,
+        #                       command=self.circle)
+        #self.bcircle.grid(row=7, column=0, columnspan=4)
+
+        #self.bcompile = tk.Button(self, text="Compile", state=tk.DISABLED, width=14,
+        #                         command=self.compile)
+        #self.bcompile.grid(row=6, column=0, columnspan=4)
+        self.forget_not_drawing()
 
 
 
-    def unsafe_compile(self):
-        config.poss_err = float(self.poss_err.get())
-        config.N = int(self.n_cells.get())
 
 
-    def circle(self):
-        self.unsafe_compile()
-
-        if config.is_count_custom:
-            # потом уберём
-            circle_funcs.generate_circle()
-            backend.contur_ordering()
-            custom_contur_funcs.generate_is_in_array()
+    def n_cells_callback(self, name, index, mode, status, colr, value):
+        good_value = False
+        try:
+            n_cells = int(value.get())
+            good_value = True
+        except:
+            pass
+        if good_value:
+            if n_cells>0:
+                config.N = n_cells
+                status.set("Correct value")
+                colr.configure(fg="green")
+            else:
+                status.set("Put positive value")
+                colr.configure(fg="red")
         else:
-            if config.curr_counting:
-                circle_funcs.generate_circle()
-
-        config.curr_drawing = "contur"
-        self.master.plotF.replot()
-        self.bcompile.config(state=tk.NORMAL)
+            status.set("Put positive integer value")
+            colr.configure(fg="red")
 
 
-    def compile(self):
-        counting.count()
-        config.curr_drawing = "3d"
-        self.master.plotF.replot()
-        self.bcompile.config(state=tk.DISABLED)
+
+    def poss_err_callback(self, name, index, mode, status, colr, value):
+        good_value = False
+        try:
+            poss_err = float(value.get())
+            good_value = True
+        except:
+            pass
+        if good_value:
+            config.poss_err = poss_err
+            status.set("Correct value")
+            colr.configure(fg="green")
+        else:
+            status.set("Put float value")
+            colr.configure(fg="red")
+
+    def forget_not_drawing(self):
+        print(config.curr_counting)
+        if config.curr_counting=="circle":
+            self.circle_panel = Circle_panel(self)
+            self.circle_panel.grid(row=self.draw_row, column=0, columnspan=2)
+            self.eclipse_panel.grid_forget()
+            self.rectangle_panel.grid_forget()
+        elif config.curr_counting=="eclipse":
+            self.eclipse_panel = Eclipse_panel(self)
+            self.eclipse_panel.grid(row=self.draw_row, column=0, columnspan=2)
+            self.circle_panel.grid_forget()
+            self.rectangle_panel.grid_forget()
+        elif config.curr_counting=="rectangle":
+            self.rectangle_panel = Rectangle_panel(self)
+            self.rectangle_panel.grid(row=self.draw_row, column=0, columnspan=2)
+            self.circle_panel.grid_forget()
+            self.eclipse_panel.grid_forget()
+
+    def curr_counting_callback(self, name, index, mode, status):
+        config.curr_counting = status.get()
+        self.forget_not_drawing()

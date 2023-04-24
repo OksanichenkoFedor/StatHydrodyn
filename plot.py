@@ -30,7 +30,7 @@ class PlotFrame(tk.Frame):
 
         self.toolbarFrame = tk.Frame(master=self)
         self.toolbarFrame.grid(row=1, columnspan=2, sticky="w")
-        #self.toolbar1 = NavigationToolbar2Tk(self.canvas, self.toolbarFrame)
+        self.toolbar1 = NavigationToolbar2Tk(self.canvas, self.toolbarFrame)
         self.plot()
 
     def plot(self):
@@ -40,7 +40,7 @@ class PlotFrame(tk.Frame):
     def replot(self):
         self.f.clf()
 
-        if config.curr_drawing in ["3d", "contur"]:
+        if config.curr_drawing in ["3d", "contur", "empty", "drawing"]:
             if config.curr_drawing == "3d":
                 self.a = self.f.add_subplot(111, projection='3d')
                 curr_x = config.curr_x
@@ -57,9 +57,15 @@ class PlotFrame(tk.Frame):
 
                 if config.curr_contur != None:
                     self.a = self.f.add_subplot(111)
+                    self.a.set_xlim([0, config.N])
+                    self.a.set_ylim([0, config.N])
                     self.a.plot(config.curr_contur[0], config.curr_contur[1])
                     self.a.grid()
+            elif config.curr_drawing == "empty":
+                pass
+
             self.canvas.draw()
+
 
         else:
             print("Incorrect current drawing")

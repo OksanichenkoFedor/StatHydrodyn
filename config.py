@@ -17,8 +17,10 @@ poss_err = 2
 
 # figure parameters
 R = None
-a = None
-b = None
+a = 2
+b = 1
+m = 0.5
+n = 1.0
 C = -1.0
 
 
