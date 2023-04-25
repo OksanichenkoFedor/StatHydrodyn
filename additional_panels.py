@@ -39,6 +39,7 @@ class CirclePanel(tk.Frame):
         config.curr_drawing = "contur"
         self.master.master.plotF.replot()
         self.bcompile.config(state=tk.NORMAL)
+        self.master.nc_ent.config(state=tk.NORMAL)
 
 
     def compile(self):
@@ -48,6 +49,7 @@ class CirclePanel(tk.Frame):
         config.curr_drawing = "3d"
         self.master.master.plotF.replot()
         self.bcompile.config(state=tk.DISABLED)
+
 
 
 
@@ -111,6 +113,7 @@ class EclipsePanel(tk.Frame):
         config.curr_drawing = "contur"
         self.master.master.plotF.replot()
         self.bcompile.config(state=tk.NORMAL)
+        self.master.nc_ent.config(state=tk.NORMAL)
 
     def compile(self):
         config.curr_drawing = "empty"
@@ -219,6 +222,7 @@ class RectanglePanel(tk.Frame):
         config.curr_drawing = "contur"
         self.master.master.plotF.replot()
         self.bcompile.config(state=tk.NORMAL)
+        self.master.nc_ent.config(state=tk.NORMAL)
 
     def compile(self):
         config.curr_drawing = "empty"
@@ -302,12 +306,14 @@ class CustomPanel(tk.Frame):
             self.master.master.plotF.replot()
             self.bdraw.config(text="Start drawing")
             self.bcompile.config(state=tk.DISABLED)
+            self.master.nc_ent.config(state=tk.NORMAL)
         else:
             config.is_collected_custom_contur = True
             config.curr_drawing = "drawing"
             self.master.master.plotF.replot()
             self.bdraw.config(text="Reset")
             self.bcompile.config(state=tk.DISABLED)
+            self.master.nc_ent.config(state=tk.DISABLED)
 
     def compile(self):
         config.curr_drawing = "contur"
@@ -315,7 +321,8 @@ class CustomPanel(tk.Frame):
         count(self.progress_bar, self.progress_txt, self.progress_var)
         config.curr_drawing = "3d"
         self.master.master.plotF.replot()
-        self.bcompile.config(state=tk.DISABLED)
+
+        self.bcompile.config(state=tk.NORMAL)
 
 
     def custom_contur(self):

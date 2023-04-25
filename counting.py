@@ -52,7 +52,7 @@ def count(progress_bar, progress_txt, progress_var, num_iters=10):
 
         num_points = 0
         if config.poss_err < 0:
-            num_points = int(config.poss_err)
+            num_points = -int(config.poss_err)
         progress_txt.set("Delta: " + str(round(delta, num_points)))
         progress_var.set(min(maximum, initial_delta - int(1000 * np.log(delta) / np.log(10.0))))
         #print(min(maximum, initial_delta - int(1000 * np.log(delta) / np.log(10.0))))
@@ -76,7 +76,7 @@ def count(progress_bar, progress_txt, progress_var, num_iters=10):
         delta = np.abs(curr_flow - count_flow())
         num_points = 0
         if config.poss_err < 0:
-            num_points = int(config.poss_err)
+            num_points = -int(config.poss_err)
         progress_txt.set("Delta: " + str(round(delta, num_points)))
         progress_var.set(min(maximum, initial_delta - int(1000 * np.log(delta) / np.log(10.0))))
         #print(min(maximum, initial_delta - int(1000 * np.log(delta) / np.log(10.0))))
