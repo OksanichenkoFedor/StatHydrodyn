@@ -5,8 +5,8 @@ import config
 from circle_funcs import generate_circle
 from eclipse_funcs import generate_eclipse
 from rectangle_funcs import generate_rectangle
-from backend import contur_ordering
-from custom_contur_funcs import generate_is_in_array, generate_unordered_contur_array
+from backend import contur_ordering, custom_contur_ordering
+from custom_contur_funcs import generate_is_in_array, generate_unordered_contur_array, custom_generate_is_in_array
 from counting import count
 
 class CirclePanel(tk.Frame):
@@ -290,12 +290,15 @@ class CustomPanel(tk.Frame):
         self.bcompile = tk.Button(self, text="Compile", state=tk.DISABLED, width=14,
                                   command=self.compile)
         self.bcompile.grid(row=1, column=0, columnspan=2)
+        self.bcount = tk.Button(self, text="Count", state=tk.DISABLED, width=14,
+                                  command=self.count)
+        self.bcount.grid(row=2, column=0, columnspan=2)
         self.progress_bar = Progressbar(self, orient="horizontal", maximum=10, mode="determinate",
                                         var=self.progress_var)
         self.progress_lbl = tk.Label(self, textvariable=self.progress_txt)
         self.progress_txt.set("Delta: 0")
-        self.progress_bar.grid(row=2, column=0)
-        self.progress_lbl.grid(row=2, column=1)
+        self.progress_bar.grid(row=3, column=0)
+        self.progress_lbl.grid(row=3, column=1)
 
 
 
@@ -307,6 +310,7 @@ class CustomPanel(tk.Frame):
             self.bdraw.config(text="Start drawing")
             self.bcompile.config(state=tk.DISABLED)
             self.master.nc_ent.config(state=tk.NORMAL)
+            config.number_conturs = 0
         else:
             config.is_collected_custom_contur = True
             config.curr_drawing = "drawing"
@@ -314,6 +318,7 @@ class CustomPanel(tk.Frame):
             self.bdraw.config(text="Reset")
             self.bcompile.config(state=tk.DISABLED)
             self.master.nc_ent.config(state=tk.DISABLED)
+            self.bcount.config(state=tk.NORMAL)
 
     def compile(self):
         config.curr_drawing = "contur"
@@ -323,13 +328,18 @@ class CustomPanel(tk.Frame):
         self.master.master.plotF.replot()
 
         self.bcompile.config(state=tk.NORMAL)
+        self.bcount.config(state=tk.DISABLED)
+        #self.bcompile.config(state=tk.DISABLED)
 
 
+    def count(self):
+        self.custom_contur()
     def custom_contur(self):
-        contur_ordering()
+        custom_contur_ordering()
         generate_unordered_contur_array()
-        contur_ordering()
-        generate_is_in_array()
+        custom_contur_ordering()
+        custom_generate_is_in_array()
+        #generate_is_in_array()
         config.curr_drawing = "contur"
         self.master.master.plotF.replot()
         self.bcompile.config(state=tk.NORMAL)

@@ -1,6 +1,8 @@
 curr_drawing = "contur"
 last_drawed = "contur"
 curr_contur = None
+add_conturs = []
+number_conturs = 0
 
 curr_x = None
 

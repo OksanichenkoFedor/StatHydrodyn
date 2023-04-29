@@ -66,8 +66,13 @@ class PlotFrame(tk.Frame):
 
                     self.a.set_xlim([0, config.N])
                     self.a.set_ylim([0, config.N])
-                    for i in range(len(config.curr_contur[0])):
-                        self.fill_point(config.curr_contur[0][i], config.curr_contur[1][i])
+                    if config.number_conturs > 0:
+                        for ind in range(config.number_conturs):
+                            for i in range(len(config.curr_contur[ind][0])):
+                                self.fill_point(config.curr_contur[ind][0][i], config.curr_contur[ind][1][i])
+                    else:
+                        for i in range(len(config.curr_contur[0])):
+                            self.fill_point(config.curr_contur[0][i], config.curr_contur[1][i])
                     # self.a.plot(config.curr_contur[0], config.curr_contur[1])
                     self.make_grid()
 
@@ -117,21 +122,26 @@ class PlotFrame(tk.Frame):
             return 0
         x = int(event.xdata)
         y = int(event.ydata)
-        config.curr_contur[0].append(x)
-        config.curr_contur[1].append(y)
+        config.curr_contur[-1][0].append(x)
+        config.curr_contur[-1][1].append(y)
         self.fill_point(x, y)
         self.canvas.draw()
         #print("Move:", event.xdata, event.ydata)
 
     def click_mouse_event(self, event):
+
         if event.ydata == None or event.xdata == None:
             return 0
         if config.curr_counting != "custom":
             return 0
         if config.curr_drawing != "drawing":
             return 0
+        config.number_conturs += 1
         config.mouse_clicked = True
-        config.curr_contur = [[], []]
+        if config.number_conturs == 1:
+            config.curr_contur = [[[], []]]
+        else:
+            config.curr_contur.append([[], []])
         #print("Click:", event.xdata, event.ydata)
 
     def unclick_mouse_event(self, event):
@@ -140,5 +150,6 @@ class PlotFrame(tk.Frame):
         if config.curr_drawing != "drawing":
             return 0
         config.mouse_clicked = False
-        self.master.common.custom_panel.custom_contur()
+
+        #self.master.common.custom_panel.custom_contur()
         #print("Unclick", event.xdata, event.ydata)
